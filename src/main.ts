@@ -1,15 +1,11 @@
 import "./style.css";
 import Phaser from "phaser";
-import { getLevelScene } from "./util";
+import { getLevelScene, isPWA } from "./util";
 import "./pwa";
 const lvl = getLevelScene();
 
 window.addEventListener("load", () => {
     const orientation: any = screen.orientation;
-
-    if (orientation && orientation.lock) {
-        orientation.lock("landscape").catch(() => {});
-    }
 
     const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
@@ -25,5 +21,11 @@ window.addEventListener("load", () => {
         },
         scene: [lvl],
     };
+    if (isPWA() && orientation && orientation.lock) {
+        orientation.lock("landscape").catch(() => {});
+
+        config.width = window.innerHeight;
+        config.height = window.innerWidth;
+    }
     new Phaser.Game(config);
 });

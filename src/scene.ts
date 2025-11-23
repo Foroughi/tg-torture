@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { getDeath, getLevel, increaseDeath, nextLevel, type GameStatus } from "./util";
+import { getDeath, getLevel, increaseDeath, isPWA, nextLevel, type GameStatus } from "./util";
 import { DEBUG, DEVMOD } from "./util";
 
 export abstract class BaseGameScene extends Phaser.Scene {
@@ -16,8 +16,8 @@ export abstract class BaseGameScene extends Phaser.Scene {
     sounds: any = {};
 
     readonly general_scale: number = 1;
-    readonly MaxWidthSize = window.innerWidth / this.general_scale;
-    readonly MaxHeightSize = window.innerHeight / this.general_scale;
+    readonly MaxWidthSize = (isPWA() ? window.innerHeight : window.innerWidth) / this.general_scale;
+    readonly MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
     readonly tile_size = 16 * this.general_scale;
 
     readonly MaxWidth = Math.floor(this.MaxWidthSize / this.tile_size);
