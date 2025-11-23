@@ -1,7 +1,7 @@
 import "./style.css";
 import Phaser from "phaser";
 import { getLevelScene } from "./util";
-
+import "./pwa";
 const lvl = getLevelScene();
 
 const config: Phaser.Types.Core.GameConfig = {
