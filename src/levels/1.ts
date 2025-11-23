@@ -24,6 +24,10 @@ export class Level_1 extends BaseGameScene {
         super.createDoor();
     }
 
+    override onResize(): void {
+        super.onResize();
+    }
+
     override createBlocks() {
         this.drawStaticBlock(0, this.MaxHeight - 1, this.MaxWidth, 1);
     }

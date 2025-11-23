@@ -15,21 +15,16 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
     sounds: any = {};
 
-    readonly general_scale: number = 1;
-    readonly MaxWidthSize = (isPWA() ? window.innerHeight : window.innerWidth) / this.general_scale;
-    readonly MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
-    readonly tile_size = 16 * this.general_scale;
+    general_scale: number = 1;
+    MaxWidthSize = (isPWA() ? window.innerHeight : window.innerWidth) / this.general_scale;
+    MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
+    tile_size = 16 * this.general_scale;
 
-    readonly MaxWidth = Math.floor(this.MaxWidthSize / this.tile_size);
-    readonly MaxHeight = Math.floor(this.MaxHeightSize / this.tile_size);
+    MaxWidth = Math.floor(this.MaxWidthSize / this.tile_size);
+    MaxHeight = Math.floor(this.MaxHeightSize / this.tile_size);
 
     constructor() {
         super("Scene");
-
-        for (var i = 0; i < this.MaxWidth; i++) {
-            this.blocks[i] = [];
-            for (var j = 0; j < this.MaxHeight; j++) this.blocks[i][j] = null;
-        }
     }
 
     preload() {
@@ -86,10 +81,26 @@ export abstract class BaseGameScene extends Phaser.Scene {
         });
     }
 
+    onResize() {
+        this.MaxWidthSize = (isPWA() ? window.innerHeight : window.innerWidth) / this.general_scale;
+        this.MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
+
+        this.MaxWidth = Math.floor(this.MaxWidthSize / this.tile_size);
+        this.MaxHeight = Math.floor(this.MaxHeightSize / this.tile_size);
+
+        this.scene.restart();
+    }
+
     create() {
         this.status = "inprogress";
 
         if (DEBUG) this.physics.world.createDebugGraphic();
+
+        for (var i = 0; i < this.MaxWidth; i++) {
+            this.blocks[i] = [];
+            for (var j = 0; j < this.MaxHeight; j++) this.blocks[i][j] = null;
+        }
+        this.scale.on("resize", this.onResize, this);
 
         this.createBorder();
 
