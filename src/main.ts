@@ -21,7 +21,7 @@ window.addEventListener("load", () => {
     };
     if (isPWA()) {
         const orientation: any = screen.orientation;
-        orientation.lock("landscape").catch(() => {});
+        orientation.lock("landscape-primary").catch(() => {});
         config.width = window.innerHeight;
         config.height = window.innerWidth;
     }
