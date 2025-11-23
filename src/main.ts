@@ -20,16 +20,10 @@ window.addEventListener("load", () => {
     };
 
     if (isPWA()) {
-        window.addEventListener(
-            "click",
-            () => {
-                const orientation: any = screen.orientation;
-                orientation.lock("landscape").catch(() => {});
-                config.width = window.innerHeight;
-                config.height = window.innerWidth;
-            },
-            { once: true },
-        );
+        const orientation: any = screen.orientation;
+        orientation.lock("landscape").catch(() => {});
+        config.width = window.innerHeight;
+        config.height = window.innerWidth;
     }
     new Phaser.Game(config);
 });
