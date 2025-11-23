@@ -18,6 +18,8 @@ export abstract class BaseGameScene extends Phaser.Scene {
     MaxHeight = 0;
     offsetX = 0;
     offsetY = 0;
+    playerSpeed = 150;
+    playerVelocity = 400;
 
     touchActive = false;
     touchStartX = 0;
@@ -35,7 +37,9 @@ export abstract class BaseGameScene extends Phaser.Scene {
         this.load.spritesheet("player_idle", "./player_ideal.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("player_walk", "./player_walk.png", { frameWidth: 32, frameHeight: 32 });
         this.load.spritesheet("player_fall", "./player_fall.png", { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet("saw", "./saw.png", { frameWidth: 38, frameHeight: 38 });
         this.load.image("door", "./door.png");
+        this.load.image("spike", "./spike.png");
         this.load.spritesheet("player_appear", "./player_appear.png", { frameWidth: 96, frameHeight: 96 });
         this.load.spritesheet("player_disappear", "./player_disappear.png", { frameWidth: 96, frameHeight: 96 });
 
@@ -106,6 +110,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
     }
 
     create() {
+        this.sound.stopAll();
         this.status = "inprogress";
         this.touchActive = false;
         this.touchStartX = 0;
@@ -121,21 +126,6 @@ export abstract class BaseGameScene extends Phaser.Scene {
             for (var j = 0; j < this.MaxHeight; j++) this.blocks[i][j] = null;
         }
         this.scale.on("resize", this.onResize, this);
-
-        this.createBorder();
-
-        this.createDoor();
-        this.createPlayer();
-        this.createBlocks();
-        this.drawLevel();
-        this.drawDeaths();
-
-        for (var i = 0; i < this.blocks.length; i++) {
-            this.physics.add.collider(this.player, this.blocks[i]);
-            this.physics.add.collider(this.door, this.blocks[i]);
-        }
-
-        this.init_();
 
         // this.input.addPointer(2); // allow 2 fingers
 
@@ -164,53 +154,14 @@ export abstract class BaseGameScene extends Phaser.Scene {
             }
         });
 
-        this.input.on("pointerup", () => {
-            this.touchActive = false;
-            this.slideJumpTriggered = false;
-        });
-
-        this.physics.add.overlap(
-            this.player,
-            this.door,
-            () => {
-                if (this.status != "inprogress") return;
-
-                this.status = "won";
-                this.player.setVelocity(0);
-                this.player.body.enable = false;
-
-                this.player.emit("won");
-            },
-            null,
-            this,
-        );
-
-        this.player.on("failed", () => {
-            this.sounds["fall"].stop();
-            if (!this.sounds["fail"].isPlaying) this.sounds["fail"].play();
-            this.time.delayedCall(3000, () => {
-                increaseDeath();
-                this.scene.restart();
-            });
-        });
-
-        this.player.on("won", () => {
-            this.sound.stopAll();
-            if (!this.sounds["victory"].isPlaying) this.sounds["victory"].play();
-
-            this.time.delayedCall(500, () => {
-                this.player.anims.play("player_disappear", true);
-                this.player.on("animationcomplete", () => {
-                    this.player.setVisible(false);
-                });
-            });
-            this.time.delayedCall(4000, () => {
-                if (DEVMOD) nextLevel();
-                this.scene.restart();
-            });
-        });
-
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        this.anims.create({
+            key: "saw",
+            frames: this.anims.generateFrameNumbers("saw"),
+            frameRate: 10,
+            repeat: -1,
+        });
 
         this.anims.create({
             key: "idle",
@@ -246,6 +197,77 @@ export abstract class BaseGameScene extends Phaser.Scene {
             frameRate: 10,
             repeat: 0,
         });
+
+        this.createBorder();
+        this.createDoor();
+        this.createPlayer();
+        this.createBlocks();
+        this.drawLevel();
+        this.drawDeaths();
+        this.init_();
+
+        for (var i = 0; i < this.blocks.length; i++) {
+            this.physics.add.collider(this.player, this.blocks[i]);
+            this.physics.add.collider(this.door, this.blocks[i]);
+        }
+
+        this.input.on("pointerup", () => {
+            this.touchActive = false;
+            this.slideJumpTriggered = false;
+        });
+
+        this.physics.add.overlap(
+            this.player,
+            this.door,
+            () => {
+                this.player.emit("won");
+            },
+            null,
+            this,
+        );
+
+        this.player.on("failed", () => {
+            this.status = "failed";
+            this.player.setVelocity(0);
+            this.player.body.enable = false;
+
+            this.sounds["fall"].stop();
+            this.sounds["walk"].stop();
+
+            if (!this.sounds["fail"].isPlaying) this.sounds["fail"].play();
+
+            this.time.delayedCall(500, () => {
+                this.player.anims.play("player_disappear", true);
+                this.player.on("animationcomplete", () => {
+                    this.player.setVisible(false);
+                });
+            });
+            this.time.delayedCall(3000, () => {
+                increaseDeath();
+                this.scene.restart();
+            });
+        });
+
+        this.player.on("won", () => {
+            if (this.status != "inprogress") return;
+            this.status = "won";
+            this.player.setVelocity(0);
+            this.player.body.enable = false;
+
+            this.sound.stopAll();
+            if (!this.sounds["victory"].isPlaying) this.sounds["victory"].play();
+
+            this.time.delayedCall(500, () => {
+                this.player.anims.play("player_disappear", true);
+                this.player.on("animationcomplete", () => {
+                    this.player.setVisible(false);
+                });
+            });
+            this.time.delayedCall(4000, () => {
+                if (DEVMOD) nextLevel();
+                this.scene.restart();
+            });
+        });
     }
 
     update() {
@@ -275,7 +297,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
             // LEFT
             if (moveLeft) {
-                p.setVelocityX(-180);
+                p.setVelocityX(this.playerSpeed * -1);
                 p.flipX = true;
 
                 if (p.body.blocked.down) {
@@ -288,7 +310,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
             // RIGHT
             else if (moveRight) {
-                p.setVelocityX(180);
+                p.setVelocityX(this.playerSpeed);
                 p.flipX = false;
 
                 if (p.body.blocked.down) {
@@ -306,7 +328,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
             // JUMP
             if (jump && p.body.blocked.down) {
-                p.setVelocityY(-400);
+                p.setVelocityY(this.playerVelocity * -1);
             }
 
             // FALLING
@@ -347,15 +369,13 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
     protected createPlayer() {
         this.player = this.physics.add.sprite(this.getPositionX(2), this.getPositionY(1), "player_idle", 1);
-        this.player.setGravityY(400);
+        this.player.setGravityY(this.playerVelocity);
         this.physics.add.collider(this.player, this.border);
         this.player.setDepth(10);
 
         const w = this.player.width;
-        const h = this.player.height;
-
-        this.player.setSize(2, 32);
-        this.player.setOffset((w - 3) / 2, (h - 36) / 2);
+        this.player.setSize(3, 32);
+        this.player.setOffset((w - 3) / 2, 0);
     }
 
     protected createBlocks() {}
@@ -476,11 +496,54 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
     getPositionY(y: number): number {
         if (y < 0) y = this.MaxHeight + y;
-        return this.offsetX + y * this.tile_size;
+        return this.offsetY + y * this.tile_size;
     }
 
     getPositionX(x: number): number {
         if (x < 0) x = this.MaxWidth + x;
         return this.offsetX + x * this.tile_size;
+    }
+
+    drawSaw(x: number, y: number) {
+        var obj = this.physics.add
+            .sprite(this.getPositionX(x), this.getPositionY(y), "saw")
+            .setScale(this.general_scale / 2.2)
+            .setOrigin(0, 0)
+            .setDepth(0);
+
+        obj.refreshBody();
+
+        obj.anims.play("saw", true);
+
+        this.setBlock(x, y, obj);
+
+        this.physics.add.overlap(this.player, obj, () => {
+            this.player.emit("failed");
+        });
+
+        return obj;
+    }
+
+    drawSpike(x: number, y: number, w: number, h: number, rotateDegree: number = 0) {
+        var blocks = this.physics.add.staticGroup();
+
+        for (var i = 0; i < w; i++) {
+            for (var j = 0; j < h; j++) {
+                var obj = blocks
+                    .create(this.getPositionX(x + i), this.getPositionY(y + j), "spike")
+                    .setScale(this.general_scale)
+                    .setOrigin(0, 0)
+                    .setAngle(rotateDegree)
+                    .setDepth(0);
+
+                obj.refreshBody();
+
+                this.setBlock(x + i, y + j, obj);
+            }
+        }
+
+        this.physics.add.overlap(this.player, blocks, () => {
+            this.player.emit("failed");
+        });
     }
 }
