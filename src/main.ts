@@ -5,8 +5,6 @@ import "./pwa";
 const lvl = getLevelScene();
 
 window.addEventListener("load", () => {
-    const orientation: any = screen.orientation;
-
     const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
         width: window.innerWidth,
@@ -21,9 +19,7 @@ window.addEventListener("load", () => {
         },
         scene: [lvl],
     };
-    if (isPWA() && orientation && orientation.lock) {
-        orientation.lock("landscape").catch(() => {});
-
+    if (isPWA()) {
         config.width = window.innerHeight;
         config.height = window.innerWidth;
     }
