@@ -20,8 +20,8 @@ export abstract class BaseGameScene extends Phaser.Scene {
     MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
     tile_size = 16 * this.general_scale;
 
-    MaxWidth = Math.floor(this.MaxWidthSize / this.tile_size);
-    MaxHeight = Math.floor(this.MaxHeightSize / this.tile_size);
+    MaxWidth = Math.ceil(this.MaxWidthSize / this.tile_size);
+    MaxHeight = Math.ceil(this.MaxHeightSize / this.tile_size);
 
     constructor() {
         super("Scene");
@@ -85,8 +85,8 @@ export abstract class BaseGameScene extends Phaser.Scene {
         this.MaxWidthSize = (isPWA() ? window.innerHeight : window.innerWidth) / this.general_scale;
         this.MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
 
-        this.MaxWidth = Math.floor(this.MaxWidthSize / this.tile_size);
-        this.MaxHeight = Math.floor(this.MaxHeightSize / this.tile_size);
+        this.MaxWidth = Math.ceil(this.MaxWidthSize / this.tile_size);
+        this.MaxHeight = Math.ceil(this.MaxHeightSize / this.tile_size);
 
         this.scene.restart();
     }
@@ -261,7 +261,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
     }
 
     protected createDoor() {
-        this.door = this.physics.add.sprite(1600, 100, "door").setScale(1.5);
+        this.door = this.physics.add.sprite(300, 100, "door").setScale(1.5);
         this.physics.add.collider(this.door, this.border);
         const w = this.door.width;
         const h = this.door.height;
