@@ -128,17 +128,26 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
         this.init_();
 
+        this.input.addPointer(2); // allow 2 fingers
+
         this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
             const w = this.scale.gameSize.width;
             const h = this.scale.gameSize.height;
 
-            // Jump if top area is touched
+            // SECOND finger = jump (always allowed)
+            if (pointer.id > 0) {
+                if (pointer.y < h * 0.5) {
+                    this.touchJump = true;
+                }
+                return;
+            }
+
+            // FIRST finger = move or jump
             if (pointer.y < h * 0.33) {
                 this.touchJump = true;
                 return;
             }
 
-            // Move left or right
             if (pointer.x < w / 2) {
                 this.touchLeft = true;
                 this.touchRight = false;
@@ -147,12 +156,19 @@ export abstract class BaseGameScene extends Phaser.Scene {
                 this.touchLeft = false;
             }
         });
+        this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
+            const h = this.scale.gameSize.height;
 
+            if (pointer.isDown && pointer.y < h * 0.33) {
+                this.touchJump = true;
+            }
+        });
         this.input.on("pointerup", () => {
             this.touchLeft = false;
             this.touchRight = false;
             this.touchJump = false;
         });
+
         this.physics.add.overlap(
             this.player,
             this.door,
