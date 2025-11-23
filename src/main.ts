@@ -8,7 +8,7 @@ window.addEventListener("load", () => {
     const orientation: any = screen.orientation;
 
     if (orientation && orientation.lock) {
-        orientation.lock("portrait").catch(() => {});
+        orientation.lock("landscape").catch(() => {});
     }
 
     const config: Phaser.Types.Core.GameConfig = {
