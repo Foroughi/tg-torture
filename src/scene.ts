@@ -269,7 +269,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
     }
 
     protected createDoor() {
-        this.door = this.physics.add.sprite(300, 100, "door").setScale(1.5);
+        this.door = this.physics.add.sprite(this.getPositionX(-2), this.getPositionY(1), "door").setScale(1.5);
         this.physics.add.collider(this.door, this.border);
         const w = this.door.width;
         const h = this.door.height;
@@ -279,7 +279,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
     }
 
     protected createPlayer() {
-        this.player = this.physics.add.sprite(100, 100, "player_idle", 1);
+        this.player = this.physics.add.sprite(this.getPositionX(2), this.getPositionY(1), "player_idle", 1);
         this.player.setGravityY(400);
         this.physics.add.collider(this.player, this.border);
         this.player.setDepth(10);
@@ -405,5 +405,15 @@ export abstract class BaseGameScene extends Phaser.Scene {
                 this.setBlock(x + i, y + j, obj);
             }
         }
+    }
+
+    getPositionY(y: number): number {
+        if (y < 0) y = this.MaxHeight + y;
+        return this.offsetX + y * this.tile_size;
+    }
+
+    getPositionX(x: number): number {
+        if (x < 0) x = this.MaxWidth + x;
+        return this.offsetX + x * this.tile_size;
     }
 }
