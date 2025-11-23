@@ -288,7 +288,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
         const h = this.player.height;
 
         this.player.setSize(2, 32);
-        this.player.setOffset((w - 5) / 2, (h - 36) / 2);
+        this.player.setOffset((w - 6) / 2, (h - 36) / 2);
     }
 
     protected createBlocks() {}
@@ -339,7 +339,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
         for (var i = 0; i < death.length; i++) {
             deathBlock
-                .create(29 * i + startLocation, 20, "number_0" + death[i], 90)
+                .create(this.offsetX + 29 * i + startLocation, this.offsetY + 20, "number_0" + death[i], 90)
                 .setTint(0xff0000)
                 .setScale(1.5)
                 .setOrigin(0, 0)
@@ -355,7 +355,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
         for (var i = 0; i < lvl.length; i++) {
             lvlBlock
-                .create(29 * i + 22, 20, "number_0" + lvl[i], 90)
+                .create(this.offsetX + 29 * i + 22, this.offsetY + 20, "number_0" + lvl[i], 90)
                 .setScale(1.5)
                 .setOrigin(0, 0)
                 .setDepth(0)
@@ -373,7 +373,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
     }
 
     createTriggerZone(x: number, y: number, w: number, h: number) {
-        const triggerZone = this.add.rectangle(x * this.tile_size, y * this.tile_size, w * this.tile_size, h * this.tile_size, 0xff0000, DEBUG ? 0.2 : 0).setOrigin(0, 0);
+        const triggerZone = this.add.rectangle(this.offsetX + x * this.tile_size, this.offsetY + y * this.tile_size, w * this.tile_size, h * this.tile_size, 0xff0000, DEBUG ? 0.2 : 0).setOrigin(0, 0);
         this.physics.add.existing(triggerZone, true);
         return triggerZone;
     }
