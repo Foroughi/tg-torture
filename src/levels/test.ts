@@ -25,7 +25,7 @@ export class Test_Scene extends BaseGameScene {
     }
 
     override createBlocks() {
-        this.drawStaticBlock(0, this.MaxHeight - 1, this.MaxWidth, 1);
+        this.drawStaticBlock(0, this.MaxHeight - 2, this.MaxWidth, 1);
         this.createTrap1();
     }
 
@@ -35,13 +35,13 @@ export class Test_Scene extends BaseGameScene {
             immovable: false,
         });
 
-        const tile = this.getBlock(14, this.MaxHeight - 1) as Phaser.GameObjects.Sprite;
+        const tile = this.getBlock(14, this.MaxHeight - 2) as Phaser.GameObjects.Sprite;
 
         const dyn = this.physics.add.sprite(tile.x, tile.y, tile.texture.key, tile.frame.name).setScale(tile.scaleX, tile.scaleY).setOrigin(tile.originX, tile.originY);
         dyn.refreshBody();
         trap.add(dyn);
 
-        this.setBlock(14, this.MaxHeight - 1, dyn);
+        this.setBlock(14, this.MaxHeight - 2, dyn);
 
         const triggerZone = this.createTriggerZone(13, this.MaxHeight - 10, 2, 10);
 

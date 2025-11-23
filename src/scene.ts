@@ -355,48 +355,42 @@ export abstract class BaseGameScene extends Phaser.Scene {
         this.border = this.physics.add.staticGroup();
         this.bg = this.physics.add.staticGroup();
 
-        var scale = 2;
-        var size = 16;
-        var tile_size = scale * size;
-        var maxWidth = Math.floor(window.innerWidth / tile_size);
-        var maxHeight = Math.floor(window.innerHeight / tile_size);
-
-        for (var i = 0; i < maxWidth; i++) {
-            for (var j = 0; j < maxHeight; j++) {
-                if (j == 0 && i == maxWidth - 1) {
+        for (var i = 0; i < this.MaxWidth; i++) {
+            for (var j = 0; j < this.MaxHeight - 1; j++) {
+                if (j == 0 && i == this.MaxWidth - 1) {
                     this.border
-                        .create(i * tile_size, j * tile_size, "terrain", 90)
-                        .setScale(scale)
+                        .create(i * this.tile_size, j * this.tile_size, "terrain", 90)
+                        .setScale(this.general_scale)
                         .setOrigin(0, 0)
                         .setDepth(0)
                         .refreshBody();
                 } else if (i == 0 && j == 0) {
-                    this.border.create(i, j, "terrain", 88).setScale(scale).setOrigin(0, 0).setDepth(0);
+                    this.border.create(i, j, "terrain", 88).setScale(this.general_scale).setOrigin(0, 0).setDepth(0);
                 } else if (j == 0) {
                     this.border
-                        .create(i * tile_size, j * tile_size, "terrain", 89)
-                        .setScale(scale)
+                        .create(i * this.tile_size, j * this.tile_size, "terrain", 89)
+                        .setScale(this.general_scale)
                         .setOrigin(0, 0)
                         .setDepth(0)
                         .refreshBody();
                 } else if (i == 0) {
                     this.border
-                        .create(i * tile_size, j * tile_size, "terrain", 110)
-                        .setScale(scale)
+                        .create(i * this.tile_size, j * this.tile_size, "terrain", 110)
+                        .setScale(this.general_scale)
                         .setOrigin(0, 0)
                         .setDepth(0)
                         .refreshBody();
-                } else if (i == maxWidth - 1) {
+                } else if (i == this.MaxWidth - 1) {
                     this.border
-                        .create(i * tile_size, j * tile_size, "terrain", 112)
-                        .setScale(scale)
+                        .create(i * this.tile_size, j * this.tile_size, "terrain", 112)
+                        .setScale(this.general_scale)
                         .setOrigin(0, 0)
                         .setDepth(0)
                         .refreshBody();
                 } else {
                     this.bg
-                        .create(i * tile_size, j * tile_size, "terrain", 111)
-                        .setScale(scale)
+                        .create(i * this.tile_size, j * this.tile_size, "terrain", 111)
+                        .setScale(this.general_scale)
                         .setOrigin(0, 0)
                         .setDepth(0)
                         .refreshBody();
