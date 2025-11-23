@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { getDeath, getLevel, increaseDeath, isPWA, nextLevel, type GameStatus } from "./util";
+import { getDeath, getLevel, increaseDeath, nextLevel, type GameStatus } from "./util";
 import { DEBUG, DEVMOD } from "./util";
 
 export abstract class BaseGameScene extends Phaser.Scene {
@@ -16,12 +16,10 @@ export abstract class BaseGameScene extends Phaser.Scene {
     sounds: any = {};
 
     general_scale: number = 1;
-    MaxWidthSize = (isPWA() ? window.innerHeight : window.innerWidth) / this.general_scale;
-    MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
     tile_size = 16 * this.general_scale;
 
-    MaxWidth = Math.ceil(this.MaxWidthSize / this.tile_size);
-    MaxHeight = Math.ceil(this.MaxHeightSize / this.tile_size);
+    MaxWidth = 0;
+    MaxHeight = 0;
 
     constructor() {
         super("Scene");
@@ -49,6 +47,9 @@ export abstract class BaseGameScene extends Phaser.Scene {
             lvl = "0" + lvl;
             this.load.image(`number_${lvl}`, `./levels/${lvl}.png`);
         }
+
+        this.MaxWidth = Math.ceil(this.scale.gameSize.width / this.tile_size);
+        this.MaxHeight = Math.ceil(this.scale.gameSize.height / this.tile_size);
     }
 
     init_() {
@@ -81,12 +82,9 @@ export abstract class BaseGameScene extends Phaser.Scene {
         });
     }
 
-    onResize() {
-        this.MaxWidthSize = (isPWA() ? window.innerHeight : window.innerWidth) / this.general_scale;
-        this.MaxHeightSize = (isPWA() ? window.innerWidth : window.innerHeight) / this.general_scale;
-
-        this.MaxWidth = Math.ceil(this.MaxWidthSize / this.tile_size);
-        this.MaxHeight = Math.ceil(this.MaxHeightSize / this.tile_size);
+    onResize(gameSize: Phaser.Structs.Size) {
+        this.MaxWidth = Math.ceil(gameSize.width / this.tile_size);
+        this.MaxHeight = Math.ceil(gameSize.height / this.tile_size);
 
         this.scene.restart();
     }

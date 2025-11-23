@@ -24,8 +24,8 @@ export class Level_1 extends BaseGameScene {
         super.createDoor();
     }
 
-    override onResize(): void {
-        super.onResize();
+    override onResize(gameSize: Phaser.Structs.Size): void {
+        super.onResize(gameSize);
     }
 
     override createBlocks() {
