@@ -19,9 +19,12 @@ export abstract class BaseGameScene extends Phaser.Scene {
     offsetX = 0;
     offsetY = 0;
 
-    touchLeft: boolean = false;
-    touchRight: boolean = false;
-    touchJump: boolean = false;
+    touchActive = false;
+    touchStartX = 0;
+    touchStartY = 0;
+    touchX = 0;
+    touchY = 0;
+    slideJumpTriggered = false;
     constructor() {
         super("Scene");
     }
@@ -104,6 +107,12 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
     create() {
         this.status = "inprogress";
+        this.touchActive = false;
+        this.touchStartX = 0;
+        this.touchStartY = 0;
+        this.touchX = 0;
+        this.touchY = 0;
+        this.slideJumpTriggered = false;
 
         if (DEBUG) this.physics.world.createDebugGraphic();
 
@@ -128,45 +137,36 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
         this.init_();
 
-        this.input.addPointer(2); // allow 2 fingers
+        // this.input.addPointer(2); // allow 2 fingers
 
         this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-            const w = this.scale.gameSize.width;
-            const h = this.scale.gameSize.height;
+            this.touchActive = true;
+            this.touchStartX = pointer.x;
+            this.touchStartY = pointer.y;
 
-            // SECOND finger = jump (always allowed)
-            if (pointer.id > 0) {
-                if (pointer.y < h * 0.5) {
-                    this.touchJump = true;
-                }
-                return;
-            }
+            this.touchX = pointer.x;
+            this.touchY = pointer.y;
 
-            // FIRST finger = move or jump
-            if (pointer.y < h * 0.33) {
-                this.touchJump = true;
-                return;
-            }
-
-            if (pointer.x < w / 2) {
-                this.touchLeft = true;
-                this.touchRight = false;
-            } else {
-                this.touchRight = true;
-                this.touchLeft = false;
-            }
+            this.slideJumpTriggered = false; // reset jump state per touch
         });
         this.input.on("pointermove", (pointer: Phaser.Input.Pointer) => {
-            const h = this.scale.gameSize.height;
+            if (!pointer.isDown) return;
 
-            if (pointer.isDown && pointer.y < h * 0.33) {
-                this.touchJump = true;
+            this.touchX = pointer.x;
+            this.touchY = pointer.y;
+
+            // SLIDE UP to jump → finger moved up more than 50px
+            const dy = this.touchStartY - this.touchY;
+            if (dy > 50) {
+                this.slideJumpTriggered = true;
+            } else {
+                this.slideJumpTriggered = false;
             }
         });
+
         this.input.on("pointerup", () => {
-            this.touchLeft = false;
-            this.touchRight = false;
-            this.touchJump = false;
+            this.touchActive = false;
+            this.slideJumpTriggered = false;
         });
 
         this.physics.add.overlap(
@@ -267,10 +267,11 @@ export abstract class BaseGameScene extends Phaser.Scene {
             // default: stop movement
             p.setVelocityX(0);
 
-            // Determine input (keyboard OR touch)
-            const moveLeft = this.cursors.left.isDown || this.touchLeft;
-            const moveRight = this.cursors.right.isDown || this.touchRight;
-            const jump = this.cursors.up.isDown || this.touchJump;
+            const moveLeft = this.cursors.left.isDown || (this.touchActive && this.touchX < this.scale.gameSize.width * 0.5 && this.touchY > this.scale.gameSize.height * 0.5);
+
+            const moveRight = this.cursors.right.isDown || (this.touchActive && this.touchX >= this.scale.gameSize.width * 0.5 && this.touchY > this.scale.gameSize.height * 0.5);
+
+            const jump = this.cursors.up.isDown || (this.touchActive && this.slideJumpTriggered);
 
             // LEFT
             if (moveLeft) {
