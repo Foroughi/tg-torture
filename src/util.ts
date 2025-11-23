@@ -47,6 +47,7 @@ export function nextLevel() {
 }
 
 export function isPWA(): boolean {
+    return screen.orientation ? true : false;
     const standaloneDisplay = window.matchMedia("(display-mode: standalone)").matches;
     const iosStandalone = (window.navigator as any).standalone === true;
 
