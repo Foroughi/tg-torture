@@ -48,8 +48,8 @@ export abstract class BaseGameScene extends Phaser.Scene {
             this.load.image(`number_${lvl}`, `./levels/${lvl}.png`);
         }
 
-        this.MaxWidth = Math.ceil(this.scale.gameSize.width / this.tile_size);
-        this.MaxHeight = Math.ceil(this.scale.gameSize.height / this.tile_size);
+        this.MaxWidth = Math.floor(this.scale.gameSize.width / this.tile_size);
+        this.MaxHeight = Math.floor(this.scale.gameSize.height / this.tile_size);
     }
 
     init_() {
@@ -83,8 +83,8 @@ export abstract class BaseGameScene extends Phaser.Scene {
     }
 
     onResize(gameSize: Phaser.Structs.Size) {
-        this.MaxWidth = Math.ceil(gameSize.width / this.tile_size);
-        this.MaxHeight = Math.ceil(gameSize.height / this.tile_size);
+        this.MaxWidth = Math.floor(gameSize.width / this.tile_size);
+        this.MaxHeight = Math.floor(gameSize.height / this.tile_size);
 
         this.scene.restart();
     }
