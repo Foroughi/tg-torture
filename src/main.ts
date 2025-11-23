@@ -3,7 +3,6 @@ import Phaser from "phaser";
 import { getLevelScene, isPWA } from "./util";
 import "./pwa";
 const lvl = getLevelScene();
-var game: Phaser.Game;
 window.addEventListener("load", () => {
     const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
@@ -32,7 +31,5 @@ window.addEventListener("load", () => {
             { once: true },
         );
     }
-    if (isPWA()) {
-    }
-    game = new Phaser.Game(config);
+    new Phaser.Game(config);
 });
