@@ -20,6 +20,8 @@ window.addEventListener("load", () => {
         scene: [lvl],
     };
     if (isPWA()) {
+        const orientation: any = screen.orientation;
+        orientation.lock("portrait").catch(() => {});
         config.width = window.innerHeight;
         config.height = window.innerWidth;
     }
