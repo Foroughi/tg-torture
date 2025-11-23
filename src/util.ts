@@ -2,7 +2,7 @@ import { levels } from "./levels";
 import type { BaseGameScene } from "./scene";
 
 export const DEBUG = false;
-export const DEVMOD = false;
+export const DEVMOD = true;
 
 export function getLevel(): string {
     if (DEVMOD) return "0";
