@@ -10,16 +10,14 @@ export abstract class BaseGameScene extends Phaser.Scene {
     bg!: Phaser.Physics.Arcade.StaticGroup;
     status: GameStatus = "inprogress";
     events = new Phaser.Events.EventEmitter();
-
     blocks: (Phaser.GameObjects.GameObject | null)[][] = [];
-
     sounds: any = {};
-
     general_scale: number = 1;
     tile_size = 16 * this.general_scale;
-
     MaxWidth = 0;
     MaxHeight = 0;
+    offsetX = 0;
+    offsetY = 0;
 
     constructor() {
         super("Scene");
@@ -48,8 +46,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
             this.load.image(`number_${lvl}`, `./levels/${lvl}.png`);
         }
 
-        this.MaxWidth = Math.floor(this.scale.gameSize.width / this.tile_size);
-        this.MaxHeight = Math.floor(this.scale.gameSize.height / this.tile_size);
+        this.applySize(this.scale.gameSize);
     }
 
     init_() {
@@ -82,10 +79,23 @@ export abstract class BaseGameScene extends Phaser.Scene {
         });
     }
 
-    onResize(gameSize: Phaser.Structs.Size) {
-        this.MaxWidth = Math.floor(gameSize.width / this.tile_size);
-        this.MaxHeight = Math.floor(gameSize.height / this.tile_size);
+    applySize(gameSize: Phaser.Structs.Size) {
+        const realW = gameSize.width;
+        const realH = gameSize.height;
+        this.MaxWidth = Math.floor(realW / this.tile_size);
+        this.MaxHeight = Math.floor(realH / this.tile_size);
 
+        const usedW = this.MaxWidth * this.tile_size;
+        const usedH = this.MaxHeight * this.tile_size;
+
+        this.offsetX = (realW - usedW) / 2;
+        this.offsetY = (realH - usedH) / 2;
+
+        console.log(this.offsetX);
+        console.log(this.offsetY);
+    }
+    onResize(gameSize: Phaser.Structs.Size) {
+        this.applySize(gameSize);
         this.scene.restart();
     }
 
@@ -283,118 +293,40 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
     protected createBlocks() {}
 
-    /*
-            function setTraps(this) {
-                var trapsInfo = [
-                    {
-                        x: 16,
-                        y: 20,
-                        w: 1,
-                        h: 3,
-                    },
-                ];
-
-                var scale = 2;
-                var size = 16;
-                var tile_size = scale * size;
-
-                this.traps = this.physics.add.group();
-
-                for (let t = 0; t < trapsInfo.length; t++) {
-                    let trap = trapsInfo[t];
-
-                    let startX = trap.x;
-                    let startY = trap.y;
-                    let w = trap.w;
-                    let h = trap.h;
-
-                    var trap1 = this.physics.add.group();
-
-                    for (let i = 0; i < startX + w; i++) {
-                        for (let j = 0; j < startY + h; j++) {
-                            let gridX = startX + i;
-                            let gridY = startY + j;
-                            let tile = this.blockMap[gridX][gridY];
-
-                            const { x, y, texture, frame, scaleX, scaleY, originX, originY } = tile;
-
-                            tile.destroy();
-
-                            let dyn = trap.add.sprite(x, y, texture.key, frame.name);
-                            dyn.setScale(scaleX, scaleY);
-                            dyn.setOrigin(originX, originY);
-                            dyn.refreshBody?.();
-
-                            this.blockMap[gridX][gridY] = dyn;
-                        }
-                    }
-
-                    trap1.setAllowGravity(false);
-                    trap1.setImmovable(true);
-
-                    var triggerZone = this.add.zone((x + i - 1) * tile_size, (y + j - 1) * tile_size, (bi.w + 2) * tile_size, (bi.h + 2) * tile_size).setOrigin(0, 0);
-                    this.physics.world.enable(triggerZone);
-                    triggerZone.body.setAllowGravity(false);
-                    triggerZone.body.setImmovable(true);
-
-                    this.physics.add.overlap(
-                        this.player,
-                        triggerZone,
-                        () => {
-                            trapSprite.body.setAllowGravity(true);
-                            trapSprite.body.setImmovable(false);
-                        },
-                        null,
-                        this,
-                    );
-                }
-            }
-
-                    */
     private createBorder() {
         this.border = this.physics.add.staticGroup();
         this.bg = this.physics.add.staticGroup();
 
         for (var i = 0; i < this.MaxWidth; i++) {
-            for (var j = 0; j < this.MaxHeight - 1; j++) {
+            for (var j = 0; j < this.MaxHeight; j++) {
+                var t = 111;
+                var isBorder = true;
                 if (j == 0 && i == this.MaxWidth - 1) {
-                    this.border
-                        .create(i * this.tile_size, j * this.tile_size, "terrain", 90)
-                        .setScale(this.general_scale)
-                        .setOrigin(0, 0)
-                        .setDepth(0)
-                        .refreshBody();
+                    t = 90;
                 } else if (i == 0 && j == 0) {
-                    this.border.create(i, j, "terrain", 88).setScale(this.general_scale).setOrigin(0, 0).setDepth(0);
+                    t = 88;
                 } else if (j == 0) {
-                    this.border
-                        .create(i * this.tile_size, j * this.tile_size, "terrain", 89)
-                        .setScale(this.general_scale)
-                        .setOrigin(0, 0)
-                        .setDepth(0)
-                        .refreshBody();
+                    t = 89;
                 } else if (i == 0) {
-                    this.border
-                        .create(i * this.tile_size, j * this.tile_size, "terrain", 110)
-                        .setScale(this.general_scale)
-                        .setOrigin(0, 0)
-                        .setDepth(0)
-                        .refreshBody();
+                    t = 110;
                 } else if (i == this.MaxWidth - 1) {
+                    t = 112;
+                } else isBorder = false;
+
+                if (isBorder)
                     this.border
-                        .create(i * this.tile_size, j * this.tile_size, "terrain", 112)
+                        .create(i * this.tile_size + this.offsetX, j * this.tile_size + this.offsetY, "terrain", t)
                         .setScale(this.general_scale)
                         .setOrigin(0, 0)
                         .setDepth(0)
                         .refreshBody();
-                } else {
+                else
                     this.bg
-                        .create(i * this.tile_size, j * this.tile_size, "terrain", 111)
+                        .create(i * this.tile_size + this.offsetX, j * this.tile_size + this.offsetY, "terrain", t)
                         .setScale(this.general_scale)
                         .setOrigin(0, 0)
                         .setDepth(0)
                         .refreshBody();
-                }
             }
         }
     }
@@ -463,7 +395,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
                 else if (i == w - 1 && j == h - 1) t = 52;
 
                 var obj = blocks
-                    .create((x + i) * this.tile_size, (y + j) * this.tile_size, "terrain", t)
+                    .create(this.offsetX + (x + i) * this.tile_size, this.offsetY + (y + j) * this.tile_size, "terrain", t)
                     .setScale(this.general_scale)
                     .setOrigin(0, 0)
                     .setDepth(0);
