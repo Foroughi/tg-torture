@@ -3,7 +3,7 @@ import Phaser from "phaser";
 import { getLevelScene, isPWA } from "./util";
 import "./pwa";
 const lvl = getLevelScene();
-
+var game: Phaser.Game;
 window.addEventListener("load", () => {
     const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
@@ -19,11 +19,20 @@ window.addEventListener("load", () => {
         },
         scene: [lvl],
     };
+
     if (isPWA()) {
-        const orientation: any = screen.orientation;
-        orientation.lock("landscape-primary").catch(() => {});
-        config.width = window.innerHeight;
-        config.height = window.innerWidth;
+        window.addEventListener(
+            "click",
+            () => {
+                const orientation: any = screen.orientation;
+                orientation.lock("landscape").catch(() => {});
+                config.width = window.innerHeight;
+                config.height = window.innerWidth;
+            },
+            { once: true },
+        );
     }
-    new Phaser.Game(config);
+    if (isPWA()) {
+    }
+    game = new Phaser.Game(config);
 });
