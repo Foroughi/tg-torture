@@ -10,7 +10,7 @@ export default defineConfig({
                 name: "Torture",
                 short_name: "Torture",
                 start_url: ".",
-                display: "fullscreen",
+                display: "standalone",
                 background_color: "#000000",
                 theme_color: "#000000",
                 orientation: "landscape",
