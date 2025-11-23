@@ -19,6 +19,9 @@ export abstract class BaseGameScene extends Phaser.Scene {
     offsetX = 0;
     offsetY = 0;
 
+    touchLeft: boolean = false;
+    touchRight: boolean = false;
+    touchJump: boolean = false;
     constructor() {
         super("Scene");
     }
@@ -125,6 +128,31 @@ export abstract class BaseGameScene extends Phaser.Scene {
 
         this.init_();
 
+        this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
+            const w = this.scale.gameSize.width;
+            const h = this.scale.gameSize.height;
+
+            // Jump if top area is touched
+            if (pointer.y < h * 0.33) {
+                this.touchJump = true;
+                return;
+            }
+
+            // Move left or right
+            if (pointer.x < w / 2) {
+                this.touchLeft = true;
+                this.touchRight = false;
+            } else {
+                this.touchRight = true;
+                this.touchLeft = false;
+            }
+        });
+
+        this.input.on("pointerup", () => {
+            this.touchLeft = false;
+            this.touchRight = false;
+            this.touchJump = false;
+        });
         this.physics.add.overlap(
             this.player,
             this.door,
@@ -217,36 +245,56 @@ export abstract class BaseGameScene extends Phaser.Scene {
                 this.player.emit("failed");
                 return;
             }
-            const p = this.player;
-            p.setVelocityX(0);
-            if (this.cursors.left.isDown) {
-                p.setVelocityX(-200);
-                p.flipX = true; // face left
-                if (p.body.blocked.down) {
-                    p.anims.play("walk", true);
-                    isWalking = true;
-                    this.sound.unlock();
-                    if (!this.sounds["walk"].isPlaying) this.sounds["walk"].play();
-                }
-            } else if (this.cursors.right.isDown) {
-                p.setVelocityX(200);
-                p.flipX = false; // face right
-                if (p.body.blocked.down) {
-                    p.anims.play("walk", true);
 
+            const p = this.player;
+
+            // default: stop movement
+            p.setVelocityX(0);
+
+            // Determine input (keyboard OR touch)
+            const moveLeft = this.cursors.left.isDown || this.touchLeft;
+            const moveRight = this.cursors.right.isDown || this.touchRight;
+            const jump = this.cursors.up.isDown || this.touchJump;
+
+            // LEFT
+            if (moveLeft) {
+                p.setVelocityX(-180);
+                p.flipX = true;
+
+                if (p.body.blocked.down) {
+                    p.anims.play("walk", true);
                     isWalking = true;
                     this.sound.unlock();
                     if (!this.sounds["walk"].isPlaying) this.sounds["walk"].play();
                 }
-            } else if (p.body.blocked.down) {
-                p.anims.play("idle", true); // << your idle frame/animation
             }
-            if (this.cursors.up.isDown && p.body.blocked.down) {
+
+            // RIGHT
+            else if (moveRight) {
+                p.setVelocityX(180);
+                p.flipX = false;
+
+                if (p.body.blocked.down) {
+                    p.anims.play("walk", true);
+                    isWalking = true;
+                    this.sound.unlock();
+                    if (!this.sounds["walk"].isPlaying) this.sounds["walk"].play();
+                }
+            }
+
+            // IDLE
+            else if (p.body.blocked.down) {
+                p.anims.play("idle", true);
+            }
+
+            // JUMP
+            if (jump && p.body.blocked.down) {
                 p.setVelocityY(-400);
             }
-            if (!p.body.blocked.down && p.body.velocity.y > 280) {
-                p.anims.play("fall", true); // << your idle frame/animation
 
+            // FALLING
+            if (!p.body.blocked.down && p.body.velocity.y > 280) {
+                p.anims.play("fall", true);
                 if (!isJumping) {
                     isFalling = true;
                     this.sound.unlock();
@@ -254,12 +302,14 @@ export abstract class BaseGameScene extends Phaser.Scene {
                 }
             }
 
+            // RISING
             if (!p.body.blocked.down && p.body.velocity.y <= 0) {
                 isJumping = true;
                 this.sound.unlock();
                 if (!this.sounds["jump"].isPlaying) this.sounds["jump"].play();
             }
 
+            // Stop sounds
             if (!isWalking) if (this.sounds["walk"].isPlaying) this.sounds["walk"].stop();
             if (!isJumping) if (this.sounds["jump"].isPlaying) this.sounds["jump"].stop();
             if (!isFalling) if (this.sounds["fall"].isPlaying) this.sounds["fall"].stop();
@@ -288,7 +338,7 @@ export abstract class BaseGameScene extends Phaser.Scene {
         const h = this.player.height;
 
         this.player.setSize(2, 32);
-        this.player.setOffset((w - 6) / 2, (h - 36) / 2);
+        this.player.setOffset((w - 3) / 2, (h - 36) / 2);
     }
 
     protected createBlocks() {}
