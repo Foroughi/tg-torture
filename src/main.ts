@@ -20,6 +20,11 @@ window.addEventListener("load", () => {
                     debug: false,
                 },
             },
+
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
+            },
             scene: [lvl],
         };
         new Phaser.Game(config);
@@ -35,6 +40,10 @@ window.addEventListener("load", () => {
                     gravity: { x: 0, y: 800 },
                     debug: false,
                 },
+            },
+            scale: {
+                mode: Phaser.Scale.RESIZE,
+                autoCenter: Phaser.Scale.CENTER_BOTH,
             },
             scene: [lvl],
         };
