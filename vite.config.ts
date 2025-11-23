@@ -13,6 +13,7 @@ export default defineConfig({
                 display: "fullscreen",
                 background_color: "#000000",
                 theme_color: "#000000",
+                orientation: "landscape",
                 icons: [
                     {
                         src: "/icon-192.png",
